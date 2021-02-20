@@ -1,0 +1,72 @@
+version: "3.7"
+services:
+  web:
+    container_name: web
+    image: nginx:1.19-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html:cached
+      - ./infrastructure/nginx/default.conf:/etc/nginx/conf.d/default.conf:cached
+    links:
+      - app
+    depends_on:
+      - app
+
+  app:
+    container_name: app
+    build:
+      context: ./infrastructure/php
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www/html:cached
+    working_dir: /var/www/html
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    expose:
+      - "3306"
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_DATABASE: learn
+      MYSQL_ROOT_PASSWORD: secret
+      TZ: Asia/Tokyo
+    volumes:
+      - ./infrastructure/mysql/my.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+      - ./infrastructure/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - data-store:/var/lib/mysql
+    stop_grace_period: 1m
+
+  composer:
+    container_name: composer
+    build:
+      context: ./infrastructure/composer
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/src
+    working_dir: /src
+
+  node:
+    image: node:latest
+    container_name: node
+    volumes:
+      - ./src:/src
+    working_dir: /src
+
+  php-cs-fixer:
+    container_name: php-cs-fixer
+    entrypoint: /usr/local/bin/php-cs-fixer
+    build:
+      context: ./infrastructure/php-cs-fixer
+      dockerfile: Dockerfile
+    command: 'fix --dry-run -vv'
+    volumes:
+      - ./src:/var/www/html:cached
+    depends_on:
+      - app
+    working_dir: /var/www/html
+
+volumes:
+  data-store:
