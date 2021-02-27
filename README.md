@@ -32,6 +32,8 @@ VSCodeの設定が面倒な方は私の設定を公開しておきますので�
 
 ```shell script
 cp docker-compose.yml.example docker-compose.yml
+
+docker-compose build
 ```
 
 ### 起動
