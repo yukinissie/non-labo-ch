@@ -28,6 +28,12 @@ VSCodeの設定が面倒な方は私の設定を公開しておきますので�
 
 ## コマンド
 
+### 初めてこのリポジトリを使う場合
+
+```shell script
+cp docker-compose.yml.example docker-compose.yml
+```
+
 ### 起動
 
 ```bash
